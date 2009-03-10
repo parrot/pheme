@@ -37,10 +37,10 @@ object.
     parrotns.'export_to'(hllns, exports)
 .end
 
-.include 'languages/pheme/lib/PhemeObjects.pir'
-.include 'languages/pheme/lib/PhemeSymbols.pir'
-.include 'languages/pheme/lib/pheme_grammar_gen.pir'
-.include 'languages/pheme/lib/ASTGrammar.pir'
+.include 'lib/PhemeObjects.pir'
+.include 'lib/PhemeSymbols.pir'
+.include 'lib/pheme_grammar_gen.pir'
+.include 'lib/ASTGrammar.pir'
 
 .namespace [ 'Pheme';'Compiler' ]
 

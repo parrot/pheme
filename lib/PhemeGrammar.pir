@@ -10,7 +10,7 @@
     pheme_grammar_class = subclass pge_rule_class, 'PhemeGrammar'
 .end
 
-.include "languages/pheme/lib/pheme_grammar_gen.pir"
+.include "lib/pheme_grammar_gen.pir"
 
 # Local Variables:
 #   mode: pir
