@@ -1,44 +1,108 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
 # $Id$
 
-# Setup some commands
-PERL          = @perl@
-RM_F          = @rm_f@
-VERSION_DIR   = @versiondir@
-INCLUDE_DIR   = @includedir@$(VERSION_DIR)
-LIB_DIR       = @libdir@$(VERSION_DIR)
-BIN_DIR       = @bindir@
-TOOLS_DIR     = @libdir@$(VERSION_DIR)@slash@tools
-PARROT        = $(BIN_DIR)/parrot@exe@
-TGE_DIR       = $(LIB_DIR)/languages/tge
-PGE_LIBRARY   = $(LIB_DIR)/library/PGE
-PERL6GRAMMAR  = $(PGE_LIBRARY)/Perl6Grammar.pbc
-#CONDITIONED_LINE(darwin):
-#CONDITIONED_LINE(darwin):# MACOSX_DEPLOYMENT_TARGET must be defined for OS X compilation/linking
-#CONDITIONED_LINE(darwin):export MACOSX_DEPLOYMENT_TARGET := @osx_version@
+## arguments we want to run parrot with
+PARROT_ARGS   :=
+
+## configuration settings
+VERSION       := @versiondir@
+BIN_DIR       := @bin_dir@
+LIB_DIR       := @lib_dir@$(VERSION)
+DOC_DIR       := @doc_dir@$(VERSION)
+MANDIR        := @mandir@$(VERSION)
+
+# Set up extensions
+LOAD_EXT      := @load_ext@
+O             := @o@
+
+# Various paths
+PERL6GRAMMAR  := $(LIB_DIR)/library/PGE/Perl6Grammar.pbc
+TGE           := $(LIB_DIR)/languages/tge/tgc.pir
+
+## Setup some commands
+MAKE          := @make_c@
+PERL          := @perl@
+CAT           := @cat@
+CHMOD         := @chmod@
+CP            := @cp@
+MKPATH        := @mkpath@
+RM_F          := @rm_f@
+RM_RF         := @rm_rf@
+POD2MAN       := pod2man
+#IF(parrot_is_shared and not(cygwin or win32)):export LD_RUN_PATH := @blib_dir@:$(LD_RUN_PATH)
+PARROT        := $(BIN_DIR)/parrot@exe@
+PBC_TO_EXE    := $(BIN_DIR)/pbc_to_exe@exe@
+#IF(darwin):
+#IF(darwin):# MACOSX_DEPLOYMENT_TARGET must be defined for OS X compilation/linking
+#IF(darwin):export MACOSX_DEPLOYMENT_TARGET := @osx_version@
+
+SOURCES := \
+  lib/PhemeSymbols.pir \
+  lib/PhemeObjects.pir \
+  lib/ASTGrammar.pir \
+  lib/pheme_grammar_gen.pir \
+  pheme.pir
+
+BUILTINS_PIR :=
+
+DOCS := README
+
+BUILD_CLEANUPS := \
+  pheme.pbc \
+  lib/pheme_grammar_gen.pir \
+  lib/ASTGrammar.pir \
+  "*.c" \
+  "*$(O)" \
+  pheme@exe@ \
+#IF(win32):  parrot-pheme.exe \
+#IF(win32):  parrot-pheme.iss \
+#IF(win32):  "setup-parrot-*.exe" \
+  installable_pheme@exe@
+
+TEST_CLEANUPS :=
 
 # the default target
-all: pheme.pbc
+build: pheme.pbc
 
-lib/pheme_grammar_gen.pir: lib/pheme.g
-	$(PARROT) $(PERL6GRAMMAR) \
-	 --output=lib/pheme_grammar_gen.pir lib/pheme.g
+all: build pheme@exe@ installable
+
+pheme.pbc: $(SOURCES)
+	$(PARROT) $(PARROT_ARGS) -o pheme.pbc pheme.pir
+
+pheme@exe@: pheme.pbc
+	$(PBC_TO_EXE) pheme.pbc
+
+lib/pheme_grammar_gen.pir: $(PERL6GRAMMAR) lib/pheme.g
+	$(PARROT) $(PARROT_ARGS) $(PERL6GRAMMAR) \
+	    --output=lib/pheme_grammar_gen.pir \
+	    lib/pheme.g
 
 lib/ASTGrammar.pir: lib/pge2past.tg
-	$(PARROT) $(TGE_DIR)/tgc.pir --output=lib/ASTGrammar.pir lib/pge2past.tg
+	$(PARROT) $(TGE) --output=lib/ASTGrammar.pir lib/pge2past.tg
 
-pheme.pbc: pheme.pir lib/PhemeSymbols.pir lib/PhemeObjects.pir lib/ASTGrammar.pir lib/pheme_grammar_gen.pir
-	$(PARROT) -o pheme.pbc pheme.pir
+installable: installable_pheme@exe@
 
-# This is a listing of all targets that users can call
+installable_pheme@exe@: pheme.pbc
+	$(PBC_TO_EXE) pheme.pbc --install
+
+Makefile: config/makefiles/root.in
+	$(PERL) Configure.pl
+
+# This is a listing of all targets, that are meant to be called by users
 help:
 	@echo ""
 	@echo "Following targets are available for the user:"
 	@echo ""
-	@echo "  all:               pheme.pbc"
+	@echo "  build:             pheme.pbc"
 	@echo "                     This is the default."
+	@echo "  pheme@exe@          Self-hosting binary not to be installed."
+	@echo "  all:               pheme.pbc pheme@exe@ installable"
+	@echo "  installable:       Create libs and self-hosting binaries to be installed."
+	@echo "  install:           Install the installable targets and docs."
+	@echo ""
 	@echo "Testing:"
 	@echo "  test:              Run the test suite."
+	@echo "  test-installable:  Test self-hosting targets."
 	@echo "  testclean:         Clean up test results."
 	@echo ""
 	@echo "Cleaning:"
@@ -50,18 +114,46 @@ help:
 	@echo "  help:              Print this help message."
 	@echo ""
 
-test: all
-	$(PERL) -I$(TOOLS_DIR)/lib t/harness
+test: build
+	$(PERL) -I$(LIB_DIR)/tools/lib t/harness
+
+# basic run for missing libs
+test-installable: installable
+	echo "1" | ./installable_pheme@exe@
+
+install: installable
+	$(CP) installable_pheme@exe@ $(BIN_DIR)/parrot-pheme@exe@
+	$(CHMOD) 0755 $(BIN_DIR)/parrot-pheme@exe@
+	-$(MKPATH) $(LIB_DIR)/languages/pheme
+	$(CP) pheme.pbc $(LIB_DIR)/languages/pheme/pheme.pbc
+	-$(MKPATH) $(MANDIR)/man1
+	$(POD2MAN) pheme.pir > $(MANDIR)/man1/parrot-pheme.1
+	-$(MKPATH) $(DOC_DIR)/languages/pheme
+	$(CP) $(DOCS) $(DOC_DIR)/languages/pheme
+
+uninstall:
+	$(RM_F) $(BIN_DIR)/parrot-pheme@exe@
+	$(RM_RF) $(LIB_DIR)/languages/pheme
+	$(RM_F) $(MANDIR)/man1/parrot-pheme.1
+	$(RM_RF) $(DOC_DIR)/languages/pheme
+
+win32-inno-installer: installable
+	-$(MKPATH) man/man1
+	$(POD2MAN) pheme.pir > man/man1/parrot-pheme.1
+	-$(MKPATH) man/html
+	pod2html --infile pheme.pir --outfile man/html/parrot-pheme.html
+	$(CP) installable_pheme@exe@ parrot-pheme.exe
+	$(PERL) $(LIB_DIR)/tools/dev/mk_inno_language.pl pheme
+	iscc parrot-pheme.iss
 
 testclean:
+	$(RM_F) $(TEST_CLEANUPS)
 
-clean: testclean
-	$(RM_F) pheme.pbc
-	$(RM_F) lib/pheme_grammar_gen.pir
-	$(RM_F) lib/ASTGrammar.pir
+clean:
+	$(RM_F) $(TEST_CLEANUPS) $(BUILD_CLEANUPS)
 
-realclean: clean
-	$(RM_F) Makefile
+realclean:
+	$(RM_F) $(TEST_CLEANUPS) $(BUILD_CLEANUPS) Makefile
 
 distclean: realclean
 
@@ -69,3 +161,4 @@ distclean: realclean
 #   mode: makefile
 # End:
 # vim: ft=make:
+
