@@ -9,14 +9,14 @@ transform past (ROOT) :language('PIR') {
     .local pmc lists
     lists = node['pheme_list']
 
-    .local pmc iter
-    iter = new 'Iterator', lists
+    .local pmc it
+    it = iter lists
 
     .local pmc elem
 
   iter_loop:
-    unless iter goto iter_end
-    elem = shift iter
+    unless it goto iter_end
+    elem = shift it
     elem = tree.'get'( 'past', elem, 'pheme_list' )
 
     result.'push'( elem )
@@ -27,12 +27,12 @@ transform past (ROOT) :language('PIR') {
 }
 
 transform past (pheme_list) :language('PIR') {
-    .local pmc iter
+    .local pmc it
     $P0 = node.'hash'()
-    iter = new 'Iterator', $P0
+    it = iter $P0
 
     .local string key_name
-    key_name = shift iter
+    key_name = shift it
 
     .local pmc elem
     elem = node[key_name]
@@ -71,13 +71,13 @@ transform past (pheme_list) :language('PIR') {
     .local pmc list
     list = elem['list_item']
 
-    .local pmc iter
-    iter = new 'Iterator', list
+    .local pmc it
+    it = iter list
 
     .local pmc item
   iter_loop:
-    unless iter goto iter_end
-    item = shift iter
+    unless it goto iter_end
+    item = shift it
     item = tree.'get'( 'past', item, 'list_item' )
     op.'push'( item )
     goto iter_loop
@@ -93,12 +93,12 @@ transform past (pheme_list) :language('PIR') {
 }
 
 transform past (list_item) :language('PIR') {
-    .local pmc iter
+    .local pmc it
     $P0 = node.'hash'()
-    iter = new 'Iterator', $P0
+    it = iter $P0
 
     .local string key_name
-    key_name = shift iter
+    key_name = shift it
 
     .local pmc    elem
     elem     = node[key_name]
@@ -176,9 +176,9 @@ transform cons (PAST;Op) :language('PIR') {
 }
 
 transform make_cons (list) :language('PIR') {
-    .local pmc iter
+    .local pmc it
     $P0 = node.'hash'()
-    iter = new 'Iterator', $P0
+    it = iter $P0
 
     .local pmc cons
     cons = new ['PAST';'Op']
@@ -188,8 +188,8 @@ transform make_cons (list) :language('PIR') {
     .local pmc child
 
   iter_loop:
-    unless iter, iter_end
-    child = shift iter
+    unless it goto iter_end
+    child = shift it
     child = tree.'get'( 'past', child, 'list_item' )
     cons.'push'( child )
     goto iter_loop

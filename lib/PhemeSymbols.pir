@@ -158,17 +158,16 @@
 .sub 'cond'
     .param pmc exps :slurpy
 
-    .local pmc iter
-    iter = new 'Iterator', exps
-    iter = 0
+    .local pmc it
+    it = iter exps
 
     .local pmc cond
     .local pmc action
 
   iter_loop:
-    unless iter goto iter_end
-    cond   = shift iter
-    action = shift iter
+    unless it goto iter_end
+    cond   = shift it
+    action = shift it
 
     .local pmc result
     result = __evaluate( cond )
@@ -184,13 +183,12 @@
     .param pmc messages :slurpy
 
     .local string message
-    .local pmc iter
-    iter = new 'Iterator', messages
-    iter = 0
+    .local pmc it
+    it = iter messages
 
   iter_loop:
-    unless iter goto iter_end
-    message = shift iter
+    unless it goto iter_end
+    message = shift it
     print message
     goto iter_loop
 
@@ -301,15 +299,15 @@
     .local num result
     result   = first
 
-    .local pmc iter
-    iter = new 'Iterator', rest
+    .local pmc it
+    it = iter rest
 
     .local pmc   next
     .local num next_val
 
   loop:
-    unless iter goto end_loop
-    next     = shift iter
+    unless it goto end_loop
+    next     = shift it
     next_val = next
     result  += next_val
     goto loop
@@ -325,15 +323,15 @@
     .local num result
     result   = first
 
-    .local pmc iter
-    iter = new 'Iterator', rest
+    .local pmc it
+    it = iter rest
 
     .local pmc   next
     .local num next_val
 
   loop:
-    unless iter goto end_loop
-    next     = shift iter
+    unless it goto end_loop
+    next     = shift it
     next_val = next
     result  *= next_val
     goto loop
@@ -349,15 +347,15 @@
     .local num result
     result   = first
 
-    .local pmc iter
-    iter = new 'Iterator', rest
+    .local pmc it
+    it = iter rest
 
     .local pmc   next
     .local num next_val
 
   loop:
-    unless iter goto end_loop
-    next     = shift iter
+    unless it goto end_loop
+    next     = shift it
     next_val = next
     result  -= next_val
     goto loop

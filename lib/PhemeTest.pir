@@ -46,14 +46,14 @@
 .sub _export
     .param pmc exports :slurpy
 
-    .local pmc iter
-    iter = new 'Iterator', exports
+    .local pmc it
+    it = iter exports
 
     .local string name
     .local pmc    sub
   iter_loop:
-    unless iter goto iter_end
-    name = shift iter
+    unless it goto iter_end
+    name = shift it
     sub  = get_hll_global [ 'Test'; 'More' ], name
     set_global name, sub
     goto iter_loop
