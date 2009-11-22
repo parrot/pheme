@@ -1,7 +1,7 @@
 This is Pheme, version 0.1.0
 ----------------------------
 
-Copyright (C) 2006 - 2007, Parrot Foundation.
+Copyright (C) 2006 - 2009, Parrot Foundation.
 
 Pheme is a Parrot-based implementation of Scheme, in the sense that it has the
 same syntax (what syntax it has) and shares the name of some built-ins.  Please
@@ -20,8 +20,8 @@ PGE and TGE.
 
 Compile Pheme:
 
-  $ make
-  $ make test
+  $ parrot setup.pir
+  $ parrot setup.pir make test
 
 Note that the tests are actual Pheme programs, written entirely in Pheme
 (except for the test library, which is a PIR program).
