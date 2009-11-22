@@ -46,13 +46,14 @@ No Configure step, no Makefile generated.
 
     $P3 = new 'Hash'
     $P4 = split "\n", <<'SOURCES'
-pheme.pir
+lib/PhemeCompiler.pir
 lib/pheme_grammar_gen.pir
 lib/ASTGrammar.pir
 lib/PhemeObjects.pir
 lib/PhemeSymbols.pir
 SOURCES
-    $P3['pheme.pbc'] = $P4
+    $P3['pheme/pheme.pbc'] = $P4
+    $P3['pheme.pbc'] = 'pheme.pir'
     $P0['pbc_pir'] = $P3
 
     $P5 = new 'Hash'
@@ -64,6 +65,9 @@ SOURCES
     $S0 .= ' pheme.pbc'
     $P0['prove_exec'] = $S0
     $P0['prove_files'] = 't/*.t t/phemer/*.t'
+
+    # install
+    $P0['inst_lang'] = 'pheme/pheme.pbc'
 
     .tailcall setup(args :flat, $P0 :flat :named)
 .end

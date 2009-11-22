@@ -6,64 +6,11 @@ pheme.pir - A Pheme compiler.
 
 =head2 Description
 
-This is the base file for the Pheme compiler.
-
-This file includes the parsing and grammar rules from
-the lib/ directory, loads the relevant PGE libraries,
-and registers the compiler under the name 'Pheme'.
+This is the entry point for the Pheme compiler.
 
 =head2 Functions
 
 =over 4
-
-=item __onload()
-
-Loads the PGE libraries needed for running the parser,
-and registers the Pheme compiler using a C<HLLCompiler>
-object.
-
-=cut
-
-.HLL 'pheme'
-
-.sub '' :anon :load :init
-    load_bytecode 'PCT.pbc'
-    load_bytecode 'TGE.pbc'
-
-    .local pmc parrotns, hllns, exports
-    parrotns = get_root_namespace ['parrot']
-    hllns = get_hll_namespace
-    exports = split ' ', 'PAST PCT PGE TGE'
-    parrotns.'export_to'(hllns, exports)
-.end
-
-.include 'lib/PhemeObjects.pir'
-.include 'lib/PhemeSymbols.pir'
-.include 'lib/pheme_grammar_gen.pir'
-.include 'lib/ASTGrammar.pir'
-
-.namespace [ 'Pheme';'Compiler' ]
-
-.sub '__onload' :load :init
-    load_bytecode 'PCT.pbc'
-    load_bytecode 'PGE/Text.pbc'
-
-    .local pmc p6meta
-    p6meta = get_root_global ['parrot'], 'P6metaclass'
-
-    $P0 = p6meta.'new_class'('Match','parent'=>'parrot;PGE::Match')
-    $P0 = p6meta.'new_class'('Grammar','parent'=>'Match')
-    $P0 = p6meta.'new_class'('Pheme::PGE::Grammar','parent'=>'Grammar')
-
-    $P0 = get_hll_global ['PCT'], 'HLLCompiler'
-    $P1 = $P0.'new'()
-
-    $P1.'language'('pheme')
-    $P0 = get_hll_namespace ['Pheme';'Grammar']
-    $P1.'parsegrammar'($P0)
-    $P0 = get_hll_namespace ['Pheme';'AST';'Grammar']
-    $P1.'astgrammar'(  $P0)
-.end
 
 =item main(args :slurpy)  :main
 
@@ -73,6 +20,8 @@ Start compilation by passing any command line C<args> to the Pheme compiler.
 
 .sub 'main' :anon :main
     .param pmc args
+
+    load_language 'pheme'
 
     $P0 = compreg 'pheme'
 
@@ -102,3 +51,4 @@ Start compilation by passing any command line C<args> to the Pheme compiler.
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:
+
