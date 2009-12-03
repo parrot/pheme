@@ -30,7 +30,6 @@ No Configure step, no Makefile generated.
     $P0['license_type'] = 'Artistic License 2.0'
     $P0['license_uri'] = 'http://www.perlfoundation.org/artistic_license_2_0'
     $P0['copyright_holder'] = 'Parrot Foundation'
-    $P0['generated_by'] = 'Francois Perrad <francois.perrad@gadz.org>'
     $P0['checkout_uri'] = 'https://svn.parrot.org/languages/pheme/trunk'
     $P0['browser_uri'] = 'https://trac.parrot.org/languages/browser/pheme'
     $P0['project_uri'] = 'https://trac.parrot.org/parrot/wiki/Languages'
