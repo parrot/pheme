@@ -68,6 +68,10 @@ SOURCES
     # install
     $P0['inst_lang'] = 'pheme/pheme.pbc'
 
+    # dist
+    $P3 = split ' ', 'MAINTAINER README TODO'
+    $P0['doc_files'] = $P3
+
     .tailcall setup(args :flat, $P0 :flat :named)
 .end
 
